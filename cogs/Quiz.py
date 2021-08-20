@@ -21,23 +21,28 @@ class Quiz(commands.Cog): #클래스 Quiz 선언, commands.Cog 상속
     
     #퀴즈 명령어
     @commands.command(name = '퀴즈')
-    async def _quiz(self, ctx):
+    async def quiz(self, ctx):
         name = ctx.author.name
         problems = list(self.quizDict.keys())
         problem = choice(problems)
         answer = self.quizDict[problem]
-        embed = discord.Embed(title = '퀴즈', description = problem, color = discord.Color.blue())
+        embed = discord.Embed(
+            title = '퀴즈',
+            description = problem,
+            color = discord.Color.blue()
+        )
         await ctx.send(embed = embed)
 
         #퀴즈를 채점하는 함수
-        def checkAnswer(message):
+        def check_answer(message):
             if (message.channel == ctx.channel) and (answer in message.content):
                 return True
             else:
                 return False
         
+        #10초 안에 정답을 맞힌 경우
         try:
-            message = await self.client.wait_for('message', timeout = 10.0, check = checkAnswer)
+            message = await self.client.wait_for('message', timeout = 10.0, check = check_answer)
             name = message.author.name
             embed = discord.Embed(
                 title = '',
@@ -46,6 +51,7 @@ class Quiz(commands.Cog): #클래스 Quiz 선언, commands.Cog 상속
             )
             await ctx.send(embed = embed)
             score = 1
+        #10초 안에 정답을 맞히지 못한 경우
         except asyncio.TimeoutError:
             embed = discord.Embed(
                 title = '',
@@ -55,8 +61,10 @@ class Quiz(commands.Cog): #클래스 Quiz 선언, commands.Cog 상속
             await ctx.send(embed = embed)
             score = 0
         
+        #scoreDict에 참가자의 이름이 있을 경우 (점수 갱신)
         try:
             self.scoreDict[name] += score
+        #scoreDict에 참가자의 이름이 없을 경우 (점수 생성)
         except KeyError:
             self.scoreDict[name] = score
         
@@ -65,7 +73,7 @@ class Quiz(commands.Cog): #클래스 Quiz 선언, commands.Cog 상속
     
     #퀴즈 랭킹 명령어
     @commands.command(name = '퀴즈랭킹')
-    async def _rank(self, ctx, *, player = None):
+    async def show_ranking(self, ctx, *, player = None):
         rankDict = dict(sorted(self.scoreDict.items(), key = lambda x: x[1], reverse = True))
         people = list(rankDict.keys()) #퀴즈 참가자 리스트
         
@@ -114,12 +122,15 @@ class Quiz(commands.Cog): #클래스 Quiz 선언, commands.Cog 상속
                     inline = False
                 )
             
-            #본인이 퀴즈에 참가한 경우
+            #사용자가 퀴즈에 참가한 경우
             try:
                 name = ctx.author.name
                 rank = people.index(name) + 1
+
+                #사용자가 1등인 경우
                 if rank == 1:
                     txt = '`당신을 퀴즈왕으로 인정합니다!`'
+                #사용자가 1등이 아닌 경우
                 else:
                     gap = rankDict[people[rank-2]] - rankDict[people[rank-1]]
                     txt = f'`{rank-1}등과의 점수 차이는 {gap}점입니다!`'
@@ -129,7 +140,7 @@ class Quiz(commands.Cog): #클래스 Quiz 선언, commands.Cog 상속
                     value = f'`현재 {name}님은 {rank}등입니다.`\n' + txt,
                     inline = False
                 )
-            #본인이 퀴즈에 참가하지 않은 경우
+            #사용자가 퀴즈에 참가하지 않은 경우
             except ValueError:
                 embed.add_field(
                     name = 'ㅤ',
