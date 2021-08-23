@@ -30,7 +30,7 @@ def getUrl(keyword):
         return 'https://www.youtube.com/' + video_data.get('navigationEndpoint', {}).get('commandMetadata', {}).get('webCommandMetadata', {}).get('url', None)
 
 #정보 임베드 함수
-def getInfo(url, data):
+def getInfo(data):
 
     view_count = '{0:,}'.format(data['view_count'])
     average_rating = data['average_rating']
@@ -42,7 +42,7 @@ def getInfo(url, data):
     
     embed = discord.Embed(
         title = data['title'],
-        url = url,
+        url = data['webpage_url'],
         color = discord.Color.red()
     )
     embed.add_field(name = '조회수', value = view_count, inline = True)
