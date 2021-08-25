@@ -1,5 +1,5 @@
-import discord
 from discord.ext import commands
+import discord
 import os
 
 def main():
@@ -11,7 +11,7 @@ def main():
     for filename in os.listdir('./cogs'):
         if '.py' in filename:
             filename = filename.replace('.py', '')
-            client.load_extension(f"cogs.{filename}")
+            client.load_extension(f'cogs.{filename}')
 
     with open('token.txt', 'r') as f:
         client.run(f.read())
