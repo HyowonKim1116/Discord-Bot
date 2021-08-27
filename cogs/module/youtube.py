@@ -1,7 +1,7 @@
 import discord
+import json
 import requests
 import urllib.parse
-import json
 
 #URL 추출 함수
 def getUrl(keyword):
@@ -29,8 +29,8 @@ def getUrl(keyword):
         video_data = row.get('videoRenderer', {})
         return 'https://www.youtube.com/' + video_data.get('navigationEndpoint', {}).get('commandMetadata', {}).get('webCommandMetadata', {}).get('url', None)
 
-#정보 임베드 함수
-def getInfo(data):
+#유튜브 임베드 함수
+def getEmbed(data):
 
     view_count = '{0:,}'.format(data['view_count'])
     average_rating = data['average_rating']
@@ -45,9 +45,9 @@ def getInfo(data):
         url = data['webpage_url'],
         color = discord.Color.red()
     )
-    embed.add_field(name = '조회수', value = view_count, inline = True)
-    embed.add_field(name = '평점', value = average_rating, inline = True)
-    embed.add_field(name = '좋아요 수', value = like_count, inline = True)
+    embed.add_field(name = '조회수', value = view_count)
+    embed.add_field(name = '평점', value = average_rating)
+    embed.add_field(name = '좋아요 수', value = like_count)
     embed.set_author(name = data['uploader'], url = data['uploader_url'])
     embed.set_image(url = data['thumbnail'])
 
