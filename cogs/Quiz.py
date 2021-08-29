@@ -20,7 +20,7 @@ class Quiz(commands.Cog): #클래스 Quiz 선언, commands.Cog 상속
         print('Quiz Cog is Ready')
     
     #퀴즈 명령어
-    @commands.command(name = '퀴즈')
+    @commands.command(name = '퀴즈', description = '랜덤 퀴즈를 출력합니다.')
     async def quiz(self, ctx):
         name = ctx.author.name
         problems = list(self.quizDict.keys())
@@ -29,11 +29,11 @@ class Quiz(commands.Cog): #클래스 Quiz 선언, commands.Cog 상속
         embed = discord.Embed(
             title = '퀴즈',
             description = problem,
-            color = discord.Color.blue()
+            color = discord.Color.purple()
         )
         await ctx.send(embed = embed)
 
-        #퀴즈를 채점하는 함수
+        #퀴즈 채점 함수
         def check_answer(message):
             if (message.channel == ctx.channel) and (answer in message.content):
                 return True
@@ -42,7 +42,7 @@ class Quiz(commands.Cog): #클래스 Quiz 선언, commands.Cog 상속
         
         #10초 안에 정답을 맞힌 경우
         try:
-            message = await self.client.wait_for('message', timeout = 10.0, check = check_answer)
+            message = await self.client.wait_for('message', timeout = 10, check = check_answer)
             name = message.author.name
             embed = discord.Embed(
                 title = '',
@@ -72,8 +72,8 @@ class Quiz(commands.Cog): #클래스 Quiz 선언, commands.Cog 상속
             json.dump(self.scoreDict, f, ensure_ascii = False)
     
     #퀴즈 랭킹 명령어
-    @commands.command(name = '퀴즈랭킹')
-    async def show_ranking(self, ctx, *, player = None):
+    @commands.command(name = '퀴즈랭킹', description = '개인/전체 퀴즈 랭킹을 보여줍니다.')
+    async def ranking(self, ctx, *, player = None):
         rankDict = dict(sorted(self.scoreDict.items(), key = lambda x: x[1], reverse = True))
         people = list(rankDict.keys()) #퀴즈 참가자 리스트
         
@@ -81,7 +81,7 @@ class Quiz(commands.Cog): #클래스 Quiz 선언, commands.Cog 상속
         if len(people) == 0:
             embed = discord.Embed(
                 description = '현재까지 퀴즈에 참여한 사람이 없습니다.',
-                color = discord.Color.red()
+                color = discord.Color.dark_red()
             )
         
         #개인 퀴즈 랭킹
@@ -119,32 +119,6 @@ class Quiz(commands.Cog): #클래스 Quiz 선언, commands.Cog 상속
                 embed.add_field(
                     name = f'{i+1}등 - {people[i]}',
                     value = f'점수 : {rankDict[people[i]]}점',
-                    inline = False
-                )
-            
-            #사용자가 퀴즈에 참가한 경우
-            try:
-                name = ctx.author.name
-                rank = people.index(name) + 1
-
-                #사용자가 1등인 경우
-                if rank == 1:
-                    txt = '`당신을 퀴즈왕으로 인정합니다!`'
-                #사용자가 1등이 아닌 경우
-                else:
-                    gap = rankDict[people[rank-2]] - rankDict[people[rank-1]]
-                    txt = f'`{rank-1}등과의 점수 차이는 {gap}점입니다!`'
-                
-                embed.add_field(
-                    name = 'ㅤ',
-                    value = f'`현재 {name}님은 {rank}등입니다.`\n' + txt,
-                    inline = False
-                )
-            #사용자가 퀴즈에 참가하지 않은 경우
-            except ValueError:
-                embed.add_field(
-                    name = 'ㅤ',
-                    value = f'`{name}님의 랭킹 정보는 존재하지 않습니다.\n퀴즈에 도전해보세요!`',
                     inline = False
                 )
         
